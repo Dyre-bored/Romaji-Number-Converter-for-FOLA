@@ -195,11 +195,13 @@
 
     // Tab switching
     document.querySelectorAll('.tabBtn').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.tabContent').forEach(c=>c.classList.remove('active'));
-        document.getElementById(btn.dataset.tab).classList.add('active');
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tabContent').forEach(c=>c.classList.remove('active'));
+    const targetTab = document.getElementById(btn.dataset.tab);
+    if(targetTab){
+      targetTab.classList.add('active');
       });
     });
 
