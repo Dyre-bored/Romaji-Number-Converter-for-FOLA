@@ -194,16 +194,23 @@
     }
 
     // Tab switching
-    document.querySelectorAll('.tabBtn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
+    // Tab switching
+document.querySelectorAll('.tabBtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    // Remove active class from all buttons
     document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
+
+    // Hide all tab contents
     document.querySelectorAll('.tabContent').forEach(c=>c.classList.remove('active'));
+
+    // Show the selected tab
     const targetTab = document.getElementById(btn.dataset.tab);
     if(targetTab){
       targetTab.classList.add('active');
-      });
-    });
+    }
+  });
+});
 
     // Dark toggle
     const toggleBtn = document.getElementById('toggleDark');
