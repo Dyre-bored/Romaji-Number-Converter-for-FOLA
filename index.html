@@ -197,18 +197,13 @@
 
     // Tab switching
     // Tab switching
-document.querySelectorAll('.tabBtn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    // Remove active class from all buttons
-    document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
+document.querySelectorAll('.tabBtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
-    // Hide all tab contents
-    document.querySelectorAll('.tabContent').forEach(c=>c.classList.remove('active'));
-
-    // Show the selected tab
+    document.querySelectorAll('.tabContent').forEach(c => c.classList.remove('active'));
     const targetTab = document.getElementById(btn.dataset.tab);
-    if(targetTab){
+    if (targetTab) {
       targetTab.classList.add('active');
     }
   });
