@@ -5,114 +5,151 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Romaji - Number Converter: FOLALALALA~</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: linear-gradient(135deg, #3b82f6, #ef4444);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-      transition: background 0.3s ease;
-    }
-    .dark {
-      background: linear-gradient(135deg, #111827, #1f2937);
-      color: #f9fafb;
-    }
-    .card {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
-      padding: 20px;
-      border-radius: 16px;
-      width: 90%;
-      max-width: 600px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
-    h2 {margin:0 0 12px 0;}
-    textarea, input[type="date"] {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-top: 8px;
-    }
-    button {
-      background: linear-gradient(135deg,#2563eb,#9333ea);
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    button:hover { transform: scale(1.05); }
-    .toggleBtn { margin-left:auto; }
-    .tabs { display:flex; gap:8px; margin-bottom:12px; }
-    .tabBtn { flex:1; padding:10px; border-radius:8px; background:#374151; }
-    .tabBtn.active { background:#1d4ed8; }
-    .tabContent { display:none; }
-    .tabContent.active { display:block; }
-    .row { display:flex; gap:8px; align-items:center; margin-top:12px; }
-    .result { background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-top:12px; }
-    .refBox { display:none; margin-top:12px; padding:10px; background:rgba(0,0,0,0.4); border-radius:8px; }
+    :root{--card-w:600px}
+    body{font-family:Inter,Arial,Helvetica,sans-serif;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3b82f6,#ef4444);padding:18px;color:#fff}
+    /* Dark mode styles applied when body has .dark */
+    body.dark{background:linear-gradient(135deg,#0f172a,#111827);color:#e6eef8}
+    body.dark .card{background:rgba(255,255,255,0.03)}
+    body.dark .copyBtn{background:#0ea5e9;color:#000}
+    h2{margin:0 0 8px;font-size:18px}
+    .row{display:flex;gap:8px;align-items:center}
+    textarea,input{width:100%;padding:10px;border-radius:8px;border:none;font-size:14px}
+    .tabs{display:flex;gap:8px;margin:12px 0}
+    .tabBtn{flex:1;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);color:inherit;cursor:pointer}
+    .tabBtn.active{background:linear-gradient(135deg,#1d4ed8,#7c3aed);}
+    .tabContent{display:none}
+    .tabContent.active{display:block}
+    .result{background:rgba(0,0,0,0.25);padding:10px;border-radius:8px;margin-top:10px;position:relative}
+    .result .txt{display:block;padding-right:48px}
+    .copyBtn{position:absolute;right:8px;top:8px;padding:6px 8px;border-radius:6px;border:none;background:#111827;color:#fff;cursor:pointer}
+    .history{margin-top:8px;background:rgba(0,0,0,0.14);padding:8px;border-radius:8px}
+    .history div{display:flex;justify-content:space-between;align-items:center;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .history div:last-child{border-bottom:none}
+    .refBox{margin-top:10px;padding:10px;border-radius:8px;background:rgba(0,0,0,0.12)}
+
+    /* toast */
+    #toast{position:fixed;right:16px;bottom:16px;min-width:220px;padding:10px 14px;border-radius:8px;background:rgba(17,24,39,0.95);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,0.4);opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;z-index:9999}
+    #toast.show{opacity:1;transform:translateY(0)}
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="row">
+    <div class="row" style="justify-content:space-between">
       <h2>Romaji - Number Converter: FOLALALALA~</h2>
-      <button id="toggleDark" class="toggleBtn">🌙</button>
+      <button id="toggleDark">🌙</button>
     </div>
 
     <div class="tabs">
       <button class="tabBtn active" data-tab="numbers">Numbers Converter</button>
-      <button class="tabBtn" data-tab="dates">Date Q&A</button>
+      <button class="tabBtn" data-tab="dates">Date Q&amp;A</button>
     </div>
 
-    <!-- Numbers Converter Tab -->
+    <!-- Numbers -->
     <div id="numbers" class="tabContent active">
       <label>Romaji → Number</label>
       <textarea id="romajiInput" placeholder="e.g. hachijuu kyuuman gosen nihyaku ichi"></textarea>
-      <div class="row">
+      <div class="row" style="margin-top:8px">
         <button id="convertRomaji">Convert</button>
         <button id="clearRomaji" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">Clear</button>
       </div>
-      <div class="result" id="romajiToNum">Number will appear here.</div>
+      <div class="result">
+        <span id="romajiToNumText" class="txt">Number will appear here.</span>
+        <button class="copyBtn" data-target="romajiToNumText">📋</button>
+      </div>
+      <div id="historyRomaji" class="history"></div>
 
       <label style="margin-top:12px">Number → Romaji</label>
       <textarea id="numberInput" placeholder="e.g. 895201"></textarea>
-      <div class="row">
+      <div class="row" style="margin-top:8px">
         <button id="convertNumber">Convert</button>
         <button id="clearNumber" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">Clear</button>
       </div>
-      <div class="result" id="numToRomaji">Romaji will appear here.</div>
+      <div class="result">
+        <span id="numToRomajiText" class="txt">Romaji will appear here.</span>
+        <button class="copyBtn" data-target="numToRomajiText">📋</button>
+      </div>
+      <div id="historyNumber" class="history"></div>
     </div>
 
-    <!-- Date Q&A Tab -->
+    <!-- Dates -->
     <div id="dates" class="tabContent">
-      <label>Choose Context Date</label>
+      <label>Choose Context Date (leave empty to use today)</label>
       <input type="date" id="contextDate" />
-      <label style="margin-top:12px">Question (romaji)</label>
+      <label style="margin-top:8px">Question (romaji)</label>
       <textarea id="dateQuestion" placeholder="e.g. ashita wa nannichi desu ka"></textarea>
-      <div class="row">
+      <div class="row" style="margin-top:8px">
         <button id="processDateQ">Ask</button>
         <button id="clearDateQ" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">Clear</button>
       </div>
-      <div class="result" id="dateAnswer">Answer will appear here.</div>
-      <div class="row" style="margin-top:12px">
+      <div class="result">
+        <span id="dateAnswerText" class="txt">Answer will appear here.</span>
+        <button class="copyBtn" data-target="dateAnswerText">📋</button>
+      </div>
+      <div id="historyDate" class="history"></div>
+
+      <div style="margin-top:12px">
         <button id="toggleRef">📖 Show Reference</button>
       </div>
-      <div class="refBox" id="refBox">
+      <div id="refBox" class="refBox" style="display:none">
         <b>Days of the Week:</b><br>
-        getsuyoubi (Mon), kayoubi (Tue), suiyoubi (Wed), mokuyoubi (Thu), kinyoubi (Fri), doyoubi (Sat), nichiyoubi (Sun)<br><br>
+        getsuyoubi (Mon), kayoubi (Tue), suiyoubi (Wed), mokuyoubi (Thu), kinyoubi (Fri), doyoubi (Sat), nichiyoubi (Sun)
+        <br><br>
         <b>Days of the Month (irregular):</b><br>
         1: tsuitachi, 2: futsuka, 3: mikka, 4: yokka, 5: itsuka, 6: muika, 7: nanoka, 8: youka, 9: kokonoka, 10: tooka, 14: juuyokka, 20: hatsuka, 24: nijuuyokka
       </div>
     </div>
   </div>
 
+  <div id="toast" role="status" aria-live="polite"></div>
+
   <script>
+  document.addEventListener('DOMContentLoaded',()=>{
+    // Utilities
+    const toastEl = document.getElementById('toast');
+    function showToast(msg, ms=2000){
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      setTimeout(()=>{ toastEl.classList.remove('show'); }, ms);
+    }
+
+    async function safeCopy(text, sourceEl){
+      // Try navigator.clipboard first (user-initiated click)
+      try{
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          await navigator.clipboard.writeText(text);
+          showToast('COPIED TO CLIPBOARD');
+          return true;
+        }
+      }catch(err){
+        // permission denied or blocked — fall through
+      }
+      // Fallback to execCommand approach
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly','');
+        ta.style.position = 'absolute';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if(ok){ showToast('COPIED TO CLIPBOARD'); return true; }
+      }catch(e){ /* ignore */ }
+      // Final fallback: try to select the text so user can manually copy
+      try{
+        if(sourceEl){
+          const range = document.createRange();
+          range.selectNodeContents(sourceEl);
+          const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+          showToast('COPY FAILED — TEXT SELECTED (PRESS CTRL/CMD+C)', 3000);
+          return false;
+        }
+      }catch(e){ /* ignore */ }
+      showToast('COPY FAILED — PLEASE SELECT & COPY MANUALLY', 3000);
+      return false;
+    }
+
     // Tab switching
     document.querySelectorAll('.tabBtn').forEach(btn=>{
       btn.addEventListener('click',()=>{
@@ -123,147 +160,256 @@
       });
     });
 
-    // Dark mode toggle
+    // Dark toggle (simple invert background)
     document.getElementById('toggleDark').addEventListener('click',()=>{
       document.body.classList.toggle('dark');
     });
 
-    // Toggle Reference
+    // Reference toggle
     document.getElementById('toggleRef').addEventListener('click',()=>{
       const box=document.getElementById('refBox');
-      box.style.display=box.style.display==='block'?'none':'block';
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+      document.getElementById('toggleRef').textContent = box.style.display==='none' ? '📖 Show Reference' : '📖 Hide Reference';
     });
 
-    // Day/Month helpers
-    const dayNames=['nichiyoubi','getsuyoubi','kayoubi','suiyoubi','mokuyoubi','kinyoubi','doyoubi'];
-    const monthDays={1:'tsuitachi',2:'futsuka',3:'mikka',4:'yokka',5:'itsuka',6:'muika',7:'nanoka',8:'youka',9:'kokonoka',10:'tooka',14:'juuyokka',20:'hatsuka',24:'nijuuyokka'};
-    function getDayName(date){return dayNames[date.getDay()]}
-    function getDayOfMonth(date){let d=date.getDate();return monthDays[d]||(`${numberToRomaji(d)} nichi`)}
-
-    // Romaji to Number (supports up to 999999)
-    function romajiToNumber(str){
-      const map={zero:0,rei:0,ichi:1,ni:2,san:3,yon:4,shi:4,go:5,roku:6,nana:7,shichi:7,hachi:8,kyuu:9,ku:9,juu:10,hyaku:100,sen:1000,man:10000};
-      let parts=str.trim().split(/\s+/);
-      let total=0,num=0;
-      parts.forEach(p=>{
-        if(map[p]>=10){
-          if(num===0) num=1;
-          num*=map[p];
-          if(map[p]>=10000){total+=num;num=0;}
-        }else if(map[p]!==undefined){num+=map[p];}
+    // Copy buttons (result areas)
+    document.querySelectorAll('.copyBtn').forEach(btn=>{
+      btn.addEventListener('click', async (e)=>{
+        const targetId = btn.dataset.target;
+        const targetEl = document.getElementById(targetId);
+        if(!targetEl) { showToast('Nothing to copy'); return; }
+        const text = targetEl.textContent.trim();
+        await safeCopy(text, targetEl);
       });
-      total+=num;return total;
+    });
+
+    // History helpers
+    let historyRomaji=[], historyNumber=[], historyDate=[];
+    function updateHistory(id, arr){
+      const box = document.getElementById(id);
+      box.innerHTML = '';
+      arr.forEach(item => {
+        const row = document.createElement('div');
+        const span = document.createElement('span'); span.textContent = item;
+        const cbtn = document.createElement('button'); cbtn.textContent='📋'; cbtn.className='history-copy'; cbtn.dataset.text = item;
+        row.appendChild(span); row.appendChild(cbtn); box.appendChild(row);
+      });
     }
 
-    // Number to Romaji (supports up to 999999)
+    // Delegate history copy clicks
+    document.addEventListener('click',(e)=>{
+      const el = e.target;
+      if(el && el.classList && el.classList.contains('history-copy')){
+        const txt = el.dataset.text || '';
+        safeCopy(txt, null);
+      }
+    });
+
+    // ---------------- Number parsing / formatting (kept simple & robust) ----------------
+    function normalizeRomaji(s){ if(!s) return ''; s = s.toLowerCase(); s = s.replace(/[ū]/g,'uu').replace(/[ō]/g,'ou').replace(/[^a-z0-9\s]/g,' '); s = s.replace(/\s+/g,' ').trim(); return s; }
+
+    // A moderately robust romaji->number parser (handles common irregulars and spaced tokens)
+    function romajiToNumber(input){
+      if(!input) return NaN;
+      const s = normalizeRomaji(input);
+      const tokens = s.split(/\s+/);
+      // Dictionaries
+      const UNITS = { ichi:1, i:1, ni:2, san:3, yon:4, shi:4, go:5, roku:6, nana:7, shichi:7, hachi:8, kyuu:9, kyu:9, ku:9 };
+      const SMALL = { juu:10, hyaku:100, sen:1000 };
+      const IRREG = { sanbyaku:300, roppyaku:600, happyaku:800, sanzen:3000, hassen:8000, issen:1000 };
+      let total = 0; let section = 0; let pending = 0;
+
+      function flushPending(){ section += pending; pending = 0; }
+
+      for(let t of tokens){
+        if(IRREG[t]){ section += IRREG[t]; continue; }
+        if(UNITS[t]){ pending += UNITS[t]; continue; }
+        if(SMALL[t]){ const mult = SMALL[t]; if(pending===0) pending = 1; section += pending * mult; pending = 0; continue; }
+        if(t === 'man'){ flushPending(); total += (section || 1) * 10000; section = 0; pending = 0; continue; }
+        if(/^\d+$/.test(t)){ pending += parseInt(t,10); continue; }
+        // try to split common concatenations like 'kyuuman' -> 'kyuu' 'man'
+        // naive: attempt to match known pieces
+        let matched = false;
+        const pieces = ['kyuuman','kyuuman','gosen','nihyaku','hyaku','juu','man','sen'];
+        for(const p of pieces){ if(t.endsWith(p) && t.length>p.length){ const left = t.slice(0,t.length-p.length); const rest = p; const numLeft = romajiToNumber(left); if(!isNaN(numLeft)){ // recursive
+            // treat left * multiplier
+            if(rest==='man'){ total += (section + pending + numLeft) * 10000; section=0; pending=0; matched=true; break; }
+          }
+        }}
+        if(matched) continue;
+        // unknown token -> stop parsing
+        return NaN;
+      }
+      flushPending(); total += section; return total;
+    }
+
+    // number -> romaji (handles up to millions reasonably)
     function numberToRomaji(num){
-      if(num===0)return 'zero';
+      if(isNaN(num) || num===null) return '';
+      num = Number(num);
+      if(num===0) return 'zero';
       const units=['','ichi','ni','san','yon','go','roku','nana','hachi','kyuu'];
-      const tens=['','juu','ni juu','san juu','yon juu','go juu','roku juu','nana juu','hachi juu','kyuu juu'];
       const hundreds=['','hyaku','ni hyaku','sanbyaku','yon hyaku','go hyaku','roppyaku','nana hyaku','happyaku','kyuu hyaku'];
-      const thousands=['','sen','ni sen','san zen','yon sen','go sen','roku sen','nana sen','hassen','kyuu sen'];
-      const man='man';
-      let res='';
-      if(num>=10000){
-        let manPart=Math.floor(num/10000);
-        res+=numberToRomaji(manPart)+' '+man;
-        num%=10000;
-        if(num>0) res+=' ';
+      // thousands and higher will be built programmatically
+      let out = '';
+      // handle man (10,000) groups
+      if(num >= 10000){
+        const manPart = Math.floor(num/10000);
+        out += numberToRomaji(manPart) + ' man';
+        num %= 10000;
+        if(num>0) out += ' ';
       }
+      // thousands
       if(num>=1000){
-        let th=Math.floor(num/1000);
-        res+=thousands[th];
-        num%=1000;
-        if(num>0) res+=' ';
+        const t = Math.floor(num/1000);
+        if(t === 1) out += 'sen';
+        else out += numberToRomaji(t) + ' sen';
+        num %= 1000;
+        if(num>0) out += ' ';
       }
-      if(num>=100){
-        let h=Math.floor(num/100);
-        res+=hundreds[h];
-        num%=100;
-        if(num>0) res+=' ';
-      }
-      if(num>=10){
-        let t=Math.floor(num/10);
-        res+=tens[t];
-        num%=10;
-        if(num>0) res+=' ';
-      }
-      if(num>0){res+=units[num];}
-      return res.trim();
+      // hundreds
+      if(num>=100){ const h=Math.floor(num/100); out += (hundreds[h] || (units[h]+' hyaku')); num%=100; if(num>0) out+=' '; }
+      // tens
+      if(num>=10){ const j=Math.floor(num/10); if(j===1) out += 'juu'; else out += units[j] + ' juu'; num%=10; if(num>0) out += ' '; }
+      // units
+      if(num>0) out += units[num];
+      return out.trim();
     }
 
-    // Conversion events
+    // Day helpers
+    const dayNames = ['nichiyoubi','getsuyoubi','kayoubi','suiyoubi','mokuyoubi','kinyoubi','doyoubi'];
+    const monthDays = {1:'tsuitachi',2:'futsuka',3:'mikka',4:'yokka',5:'itsuka',6:'muika',7:'nanoka',8:'youka',9:'kokonoka',10:'tooka',14:'juuyokka',20:'hatsuka',24:'nijuuyokka'};
+    function getDayName(date){ return dayNames[date.getDay()]; }
+    function getDayOfMonth(date){ const d = date.getDate(); return monthDays[d] || (numberToRomaji(d) + ' nichi'); }
+
+    function detectCopula(q){
+      if(q.includes('ja arimasen deshita')) return 'JA ARIMASEN DESHITA';
+      if(q.includes('ja arimasen')) return 'JA ARIMASEN';
+      if(q.includes('deshita')) return 'DESHITA';
+      return 'DESU';
+    }
+
+    // Relative dictionary (longer keys first to avoid substring issues)
+    const relativeKeys = ['ototoi','asatte','ashita','kinou','kyou'];
+    const relativeMap = { kyou:0, ashita:1, asatte:2, kinou:-1, ototoi:-2 };
+
+    // ----------------- Events & wiring -----------------
+    // Helper: get text content element by id
+    const romajiToNumText = document.getElementById('romajiToNumText');
+    const numToRomajiText = document.getElementById('numToRomajiText');
+    const dateAnswerText = document.getElementById('dateAnswerText');
+
+    // Update history function already defined
+
+    // Convert romaji -> number
     document.getElementById('convertRomaji').addEventListener('click',()=>{
-      const input=document.getElementById('romajiInput').value.trim().toLowerCase();
-      document.getElementById('romajiToNum').textContent=input?romajiToNumber(input):'Please enter romaji number.';
-    });
-    document.getElementById('clearRomaji').addEventListener('click',()=>{
-      document.getElementById('romajiInput').value='';
-      document.getElementById('romajiToNum').textContent='Number will appear here.';
-    });
-
-    document.getElementById('convertNumber').addEventListener('click',()=>{
-      const input=parseInt(document.getElementById('numberInput').value.trim());
-      document.getElementById('numToRomaji').textContent=!isNaN(input)?numberToRomaji(input):'Please enter a valid number.';
-    });
-    document.getElementById('clearNumber').addEventListener('click',()=>{
-      document.getElementById('numberInput').value='';
-      document.getElementById('numToRomaji').textContent='Romaji will appear here.';
-    });
-
-    // Date Q&A logic
-    document.getElementById('processDateQ').addEventListener('click',()=>{
-      const q=document.getElementById('dateQuestion').value.trim().toLowerCase();
-      const dateVal=document.getElementById('contextDate').value;
-      const ansBox=document.getElementById('dateAnswer');
-      if(!q||!dateVal){ansBox.textContent='Please provide a date and a question.';return;}
-      const baseDate=new Date(dateVal);
-      let targetDate=new Date(baseDate);
-
-      if(q.includes('ashita')) targetDate.setDate(baseDate.getDate()+1);
-      else if(q.includes('asatte')) targetDate.setDate(baseDate.getDate()+2);
-      else if(q.includes('kinou')) targetDate.setDate(baseDate.getDate()-1);
-      else if(q.includes('ototoi')) targetDate.setDate(baseDate.getDate()-2);
-      else if(q.includes('kyou')) targetDate=baseDate;
-
-      const contextString=`(context: ${baseDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})})`;
-
-      if(q.includes('nannichi')){
-        let copula=q.includes('deshita')? 'deshita.' : 'desu.';
-        ansBox.textContent=`${contextString} ${q} = ${getDayOfMonth(targetDate)} ${copula}`;
-      }else if(q.includes('nan youbi')||q.includes('nanyoubi')){
-        let copula=q.includes('deshita')? 'deshita.' : 'desu.';
-        ansBox.textContent=`${contextString} ${q} = ${getDayName(targetDate)} ${copula}`;
-      }else if(q.includes('nichi')){
-        const asked=q.match(/([a-z ]+)nichi/);
-        if(asked){
-          const askedRomaji=asked[1].trim();
-          const askedNum=romajiToNumber(askedRomaji);
-          const actualNum=targetDate.getDate();
-          const actual=getDayOfMonth(targetDate);
-          let copula=q.includes('deshita')? 'deshita.' : 'desu.';
-          ansBox.textContent=`${contextString} ${q} = `+((askedNum===actualNum)? 'Hai, sou desu.' : `Iie, ${actual} ${copula}`);
-        }else{
-          ansBox.textContent='Sumimasen, sono shitsumon wa mada wakarimasen.';
-        }
-      }else if(q.includes('youbi')){
-        const found=dayNames.find(d=>q.includes(d));
-        if(found){
-          const actual=getDayName(targetDate);
-          let copula=q.includes('deshita')? 'deshita.' : 'desu.';
-          ansBox.textContent=`${contextString} ${q} = `+((found===actual)? 'Hai, sou desu.' : `Iie, ${actual} ${copula}`);
-        }else{
-          ansBox.textContent='Sumimasen, sono shitsumon wa mada wakarimasen.';
-        }
+      const input = document.getElementById('romajiInput').value.trim();
+      if(!input){ romajiToNumText.textContent = 'PLEASE ENTER ROMAJI NUMBER.'; return; }
+      const val = romajiToNumber(input);
+      if(isNaN(val)){
+        romajiToNumText.textContent = 'UNRECOGNISED ROMAJI NUMBER.';
       }else{
-        ansBox.textContent='Sumimasen, sono shitsumon wa mada wakarimasen.';
+        const out = String(val).toUpperCase();
+        romajiToNumText.textContent = out;
+        historyRomaji.unshift(out); if(historyRomaji.length>5) historyRomaji.pop(); updateHistory('historyRomaji', historyRomaji);
       }
     });
+    document.getElementById('clearRomaji').addEventListener('click',()=>{ document.getElementById('romajiInput').value=''; romajiToNumText.textContent='Number will appear here.'; });
 
-    document.getElementById('clearDateQ').addEventListener('click',()=>{
-      document.getElementById('dateQuestion').value='';
-      document.getElementById('dateAnswer').textContent='Answer will appear here.';
+    // Convert number -> romaji
+    document.getElementById('convertNumber').addEventListener('click',()=>{
+      const raw = document.getElementById('numberInput').value.trim();
+      const num = parseInt(raw,10);
+      if(isNaN(num)){ numToRomajiText.textContent='PLEASE ENTER A VALID NUMBER.'; return; }
+      const out = numberToRomaji(num).toUpperCase();
+      numToRomajiText.textContent = out;
+      historyNumber.unshift(out); if(historyNumber.length>5) historyNumber.pop(); updateHistory('historyNumber', historyNumber);
     });
+    document.getElementById('clearNumber').addEventListener('click',()=>{ document.getElementById('numberInput').value=''; numToRomajiText.textContent='Romaji will appear here.'; });
+
+    // Date Q&A processing (MODIFIED PER REQUEST)
+    document.getElementById('processDateQ').addEventListener('click',()=>{
+      const qRaw = document.getElementById('dateQuestion').value.trim();
+      const q = (qRaw||'').toLowerCase();
+      let dateVal = document.getElementById('contextDate').value;
+      if(!dateVal) { // default to today (local date)
+        const d = new Date(); dateVal = d.toISOString().split('T')[0];
+      }
+      if(!q){ dateAnswerText.textContent = 'PLEASE PROVIDE A QUESTION.'; return; }
+      const baseDate = new Date(dateVal);
+      let foundKey = null;
+      for(const k of relativeKeys){ if(q.includes(k)){ foundKey = k; break; } }
+      if(!foundKey) foundKey = 'kyou';
+      const offset = relativeMap[foundKey] || 0;
+      const target = new Date(baseDate); target.setDate(baseDate.getDate() + offset);
+
+      const copula = detectCopula(q);
+      const askDateGeneric = q.includes('nannichi') || q.includes('nannichi'.replace('n','n')) || q.includes('nichi');
+      const askWeekdayGeneric = q.includes('nanyoubi') || q.includes('nan youbi') || q.includes('nanyoubi'.replace('n','n')) || q.includes('youbi');
+
+      // Detect explicit asked day like "nijuuroku nichi"
+      function extractNumberPhrase(q){
+        const before = q.split('nichi')[0] || '';
+        // remove common particles and context words from the left
+        const tokens = before.trim().split(/\s+/).filter(Boolean);
+        const rels = ['ashita','asatte','kinou','ototoi','kyou','wa','no'];
+        // remove leading rel tokens
+        while(tokens.length && rels.includes(tokens[0])) tokens.shift();
+        return tokens.join(' ');
+      }
+      const explicitNumPhrase = (q.includes('nichi') && !q.includes('nannichi')) ? extractNumberPhrase(q) : '';
+      const explicitNumber = explicitNumPhrase ? romajiToNumber(explicitNumPhrase) : NaN;
+
+      let resultText = 'SUMIMASEN, SONO SHITSUMON WA MADA WAKARIMASEN.';
+      // both asked (date + weekday)
+      const bothAsked = askDateGeneric && askWeekdayGeneric && !(!q.includes('nannichi') && (q.includes('nichi') && explicitNumPhrase));
+
+      if(askDateGeneric && askWeekdayGeneric && !explicitNumPhrase){
+        const parts = [ getDayOfMonth(target), getDayName(target) ];
+        resultText = `${foundKey} wa ${parts.join(', ')} ${copula}`;
+      } else if(!isNaN(explicitNumber)){
+        // yes/no for explicit day numbers
+        const actualNum = target.getDate();
+        if(explicitNumber === actualNum){ resultText = 'HAI, SOU DESU.'; }
+        else { resultText = `IIE, ${getDayOfMonth(target)} ${copula}`; }
+      } else if(askDateGeneric){
+        resultText = `${foundKey} wa ${getDayOfMonth(target)} ${copula}`;
+      } else if(askWeekdayGeneric){
+        // check if explicit weekday name present (e.g., kayoubi)
+        const explicitWeek = dayNames.find(d=> q.includes(d));
+        if(explicitWeek){
+          const actualWeek = getDayName(target);
+          if(explicitWeek === actualWeek) resultText = 'HAI, SOU DESU.'; else resultText = `IIE, ${actualWeek} ${copula}`;
+        } else {
+          resultText = `${foundKey} wa ${getDayName(target)} ${copula}`;
+        }
+      }
+
+      // ==== MODIFIED SHOW CONTEXT SEPARATELY, ANSWER ONLY IN HISTORY ====
+      const contextEl = document.createElement('div');
+      contextEl.style.fontSize = '12px';
+      contextEl.style.opacity = '0.7';
+      contextEl.style.marginBottom = '4px';
+      contextEl.textContent = `Context: ${baseDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+
+      const answerOnly = resultText.toUpperCase();
+
+      // Clear previous content and append
+      dateAnswerText.innerHTML = '';
+      dateAnswerText.appendChild(contextEl);
+      const answerSpan = document.createElement('span');
+      answerSpan.textContent = answerOnly;
+      dateAnswerText.appendChild(answerSpan);
+
+      // Add to history (only answer)
+      historyDate.unshift(answerOnly);
+      if(historyDate.length>5) historyDate.pop();
+      updateHistory('historyDate', historyDate);
+    });
+
+    document.getElementById('clearDateQ').addEventListener('click',()=>{ document.getElementById('dateQuestion').value=''; dateAnswerText.textContent='Answer will appear here.'; });
+
+  });
   </script>
 </body>
 </html>
