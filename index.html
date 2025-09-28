@@ -124,31 +124,31 @@
     </div>
     <!-- Dates Tab -->
     <div id="dates" class="tabContent">
-      <label>Choose Context Date (leave empty to use today)</label>
-      <input type="date" id="contextDate" />
-      <label style="margin-top:8px">Question (romaji)</label>
-      <textarea id="dateQuestion" placeholder="e.g. ashita wa nannichi desu ka"></textarea>
-      <div class="row">
-        <button id="processDateQ">Ask</button>
-        <button id="clearDateQ" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">Clear</button>
-      </div>
-      <div class="result">
-        <span id="dateAnswerText" class="txt">Answer will appear here.</span>
-        <button class="copyBtn" data-target="dateAnswerText">📋</button>
-      </div>
-      <div id="historyDate" class="history"></div>
-      <div style="margin-top:12px">
-        <button id="toggleRef">📖 Show Reference</button>
-      </div>
-      <div id="refBox" class="refBox" style="display:none">
-        <b>Days of the Week:</b><br>
-        getsuyoubi (Mon), kayoubi (Tue), suiyoubi (Wed), mokuyoubi (Thu), kinyoubi (Fri), doyoubi (Sat), nichiyoubi (Sun)
-        <br><br>
-        <b>Days of the Month (irregular):</b><br>
-        1: tsuitachi, 2: futsuka, 3: mikka, 4: yokka, 5: itsuka, 6: muika, 7: nanoka, 8: youka, 9: kokonoka, 10: tooka, 14: juuyokka, 20: hatsuka, 24: nijuuyokka
-      </div>
-    </div>
+  <label>Choose Context Date (leave empty to use today)</label>
+  <input type="date" id="contextDate" />
+  <label style="margin-top:8px">Question (romaji)</label>
+  <textarea id="dateQuestion" placeholder="e.g. ashita wa nannichi desu ka"></textarea>
+  <div class="row">
+    <button id="processDateQ">Ask</button>
+    <button id="clearDateQ" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">Clear</button>
   </div>
+  <div class="result">
+    <div id="dateAnswerText" class="txt">Answer will appear here.</div>
+    <button class="copyBtn" data-target="dateAnswerText">📋</button>
+  </div>
+  <div id="historyDate" class="history"></div>
+  <div style="margin-top:12px">
+    <button id="toggleRef">📖 Show Reference</button>
+  </div>
+  <div id="refBox" class="refBox" style="display:none">
+    <b>Days of the Week:</b><br>
+    getsuyoubi (Mon), kayoubi (Tue), suiyoubi (Wed), mokuyoubi (Thu), kinyoubi (Fri), doyoubi (Sat), nichiyoubi (Sun)
+    <br><br>
+    <b>Days of the Month (irregular):</b><br>
+    1: tsuitachi, 2: futsuka, 3: mikka, 4: yokka, 5: itsuka, 6: muika, 7: nanoka, 8: youka, 9: kokonoka, 10: tooka, 14: juuyokka, 20: hatsuka, 24: nijuuyokka
+  </div>
+</div>
+</div>
   <div id="toast" role="status" aria-live="polite"></div>
   <script>
   document.addEventListener('DOMContentLoaded',()=>{
