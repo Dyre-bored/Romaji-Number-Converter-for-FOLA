@@ -61,7 +61,7 @@
     textarea{min-height:90px;resize:vertical}
     textarea:focus,input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,0.3)}
     body.dark textarea,body.dark input{background:#1e293b;border-color:#475569;color:#f1f5f9}
-    button{padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#3b82f6,#1e40af);color:white;font-weight:600;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
+    button{padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#3b82f6,#1e40af);color:white;font-weight:600;cursor:pointer;transition:transform .15s ease,box-shadow .15s[...]
     button:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.2)}
     .copyBtn{background:#111827;color:#fff;font-size:15px;border-radius:8px;padding:7px 10px;position:absolute;right:10px;top:10px;}
     body.dark .copyBtn{background:#0ea5e9;color:#000;}
@@ -76,7 +76,7 @@
     body.dark .muted{color:#94a3b8}
     .refBox{margin-top:10px;padding:10px;border-radius:10px;background:rgba(0,0,0,0.10)}
     /* toast */
-    #toast{position:fixed;right:16px;bottom:16px;min-width:220px;padding:10px 14px;border-radius:8px;background:rgba(17,24,39,0.95);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,0.4);opacity:0;transform:translateY(24px);pointer-events:none;transition:opacity .2s,transform .2s;}
+    #toast{position:fixed;right:16px;bottom:16px;min-width:220px;padding:10px 14px;border-radius:8px;background:rgba(17,24,39,0.95);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,0.4);opacity:0;transform[...]
     #toast.show{opacity:1;transform:translateY(0);}
   </style>
 </head>
@@ -120,7 +120,7 @@
           <div id="historyNumber" class="history"></div>
         </div>
       </div>
-      <div class="muted" style="margin-top:8px">Limit: up to 9 digits (0–999,999,999). Handles concatenated romaji like <code>gosen</code>, <code>nihyaku</code>, and irregular forms <code>sanbyaku</code>, <code>roppyaku</code>, <code>happyaku</code>, <code>sanzen</code>, <code>hassen</code>.</div>
+      <div class="muted" style="margin-top:8px">Limit: up to 9 digits (0–999,999,999). Handles concatenated romaji like <code>gosen</code>, <code>nihyaku</code>, and irregular forms <code>sanbyaku</[...]
     </div>
     <!-- Dates Tab -->
     <div id="dates" class="tabContent">
@@ -343,63 +343,81 @@
       historyNumber.unshift(out); if(historyNumber.length>5) historyNumber.pop(); updateHistory('historyNumber', historyNumber);
     });
     document.getElementById('clearNumber').addEventListener('click',()=>{ document.getElementById('numberInput').value=''; numToRomajiText.textContent='Romaji will appear here.'; });
-    // Date Q&A processing
+    
+    // Date Q&A processing (APPLIED PATCH)
     document.getElementById('processDateQ').addEventListener('click',()=>{
       const qRaw = document.getElementById('dateQuestion').value.trim();
       const q = (qRaw||'').toLowerCase();
       let dateVal = document.getElementById('contextDate').value;
-      if(!dateVal) { const d = new Date(); dateVal = d.toISOString().split('T')[0]; }
+      if(!dateVal) { 
+        const d = new Date(); dateVal = d.toISOString().split('T')[0];
+      }
       if(!q){ dateAnswerText.textContent = 'PLEASE PROVIDE A QUESTION.'; return; }
       const baseDate = new Date(dateVal);
-      let foundKey = null;
-      for(const k of relativeKeys){ if(q.includes(k)){ foundKey = k; break; } }
-      if(!foundKey) foundKey = 'kyou';
-      const offset = relativeMap[foundKey] || 0;
-      const target = new Date(baseDate); target.setDate(baseDate.getDate() + offset);
+
+      // Relative day
+      const relativeKeys = ['ototoi','asatte','ashita','kinou','kyou'];
+      const relativeMap = { kyou:0, ashita:1, asatte:2, kinou:-1, ototoi:-2 };
+      let foundKey = relativeKeys.find(k=>q.includes(k)) || 'kyou';
+      const offset = relativeMap[foundKey];
+      const target = new Date(baseDate);
+      target.setDate(baseDate.getDate() + offset);
+
+      // Copula detection
+      function detectCopula(q){
+        if(q.includes('ja arimasen deshita')) return 'JA ARIMASEN DESHITA';
+        if(q.includes('ja arimasen')) return 'JA ARIMASEN';
+        if(q.includes('deshita')) return 'DESHITA';
+        return 'DESU';
+      }
       const copula = detectCopula(q);
+
+      // Asked type detection
       const askDateGeneric = q.includes('nannichi') || q.includes('nichi');
       const askWeekdayGeneric = q.includes('nanyoubi') || q.includes('youbi');
-      function extractNumberPhrase(q){
-        const before = q.split('nichi')[0] || '';
-        const tokens = before.trim().split(/\s+/).filter(Boolean);
-        const rels = ['ashita','asatte','kinou','ototoi','kyou','wa','no'];
-        while(tokens.length && rels.includes(tokens[0])) tokens.shift();
-        return tokens.join(' ');
+
+      // Check for explicit irregular date word (e.g. "tsuitachi")
+      const monthDays = {1:'tsuitachi',2:'futsuka',3:'mikka',4:'yokka',5:'itsuka',6:'muika',7:'nanoka',8:'youka',9:'kokonoka',10:'tooka',14:'juuyokka',20:'hatsuka',24:'nijuuyokka'};
+      let explicitNumber = null;
+      for(const [num, word] of Object.entries(monthDays)){
+        if(q.includes(word)){ explicitNumber = parseInt(num,10); break; }
       }
-      const explicitNumPhrase = (q.includes('nichi') && !q.includes('nannichi')) ? extractNumberPhrase(q) : '';
-      const explicitNumber = explicitNumPhrase ? romajiToNumber(explicitNumPhrase) : NaN;
-      let resultText = 'SUMIMASEN, SONO SHITSUMON WA MADA WAKARIMASEN.';
-      const bothAsked = askDateGeneric && askWeekdayGeneric && !(!q.includes('nannichi') && (q.includes('nichi') && explicitNumPhrase));
-      if(askDateGeneric && askWeekdayGeneric && !explicitNumPhrase){
-        const parts = [ getDayOfMonth(target), getDayName(target) ];
-        resultText = `${foundKey} wa ${parts.join(', ')} ${copula}`;
-      } else if(!isNaN(explicitNumber)){
+
+      // Result determination
+      let resultText = '';
+      const dayNames = ['nichiyoubi','getsuyoubi','kayoubi','suiyoubi','mokuyoubi','kinyoubi','doyoubi'];
+      if(explicitNumber !== null){
         const actualNum = target.getDate();
-        if(explicitNumber === actualNum){ resultText = 'HAI, SOU DESU.'; }
-        else { resultText = `IIE, ${getDayOfMonth(target)} ${copula}`; }
-      } else if(askDateGeneric){
-        resultText = `${foundKey} wa ${getDayOfMonth(target)} ${copula}`;
-      } else if(askWeekdayGeneric){
-        const explicitWeek = dayNames.find(d=> q.includes(d));
-        if(explicitWeek){
-          const actualWeek = getDayName(target);
-          if(explicitWeek === actualWeek) resultText = 'HAI, SOU DESU.'; else resultText = `IIE, ${actualWeek} ${copula}`;
+        if(explicitNumber === actualNum){
+          resultText = `${foundKey.toUpperCase()} WA ${monthDays[actualNum].toUpperCase()} ${copula}`;
         } else {
-          resultText = `${foundKey} wa ${getDayName(target)} ${copula}`;
+          resultText = `${foundKey.toUpperCase()} WA ${monthDays[actualNum].toUpperCase()} ${copula}`;
         }
+      } else if(askDateGeneric && askWeekdayGeneric){
+        resultText = `${foundKey.toUpperCase()} WA ${(monthDays[target.getDate()] || target.getDate()).toString().toUpperCase()}, ${dayNames[target.getDay()].toUpperCase()} ${copula}`;
+      } else if(askDateGeneric){
+        resultText = `${foundKey.toUpperCase()} WA ${(monthDays[target.getDate()] || target.getDate()).toString().toUpperCase()} ${copula}`;
+      } else if(askWeekdayGeneric){
+        resultText = `${foundKey.toUpperCase()} WA ${dayNames[target.getDay()].toUpperCase()} ${copula}`;
+      } else {
+        resultText = 'SUMIMASEN, SONO SHITSUMON WA MADA WAKARIMASEN.';
       }
-      const contextEl = document.createElement('div');
-      contextEl.style.fontSize = '12px';
-      contextEl.style.opacity = '0.7';
-      contextEl.style.marginBottom = '4px';
-      contextEl.textContent = `Context: ${baseDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
-      const answerOnly = resultText.toUpperCase();
+
+      // Show context above answer
       dateAnswerText.innerHTML = '';
+      const contextEl = document.createElement('div');
+      contextEl.style.fontSize='12px';
+      contextEl.style.opacity='0.7';
+      contextEl.style.marginBottom='4px';
+      contextEl.textContent = `Context: ${baseDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
       dateAnswerText.appendChild(contextEl);
+
       const answerSpan = document.createElement('span');
-      answerSpan.textContent = answerOnly;
+      answerSpan.textContent = resultText.toUpperCase();
       dateAnswerText.appendChild(answerSpan);
-      historyDate.unshift(answerOnly);
+
+      // History
+      historyDate.unshift(resultText.toUpperCase());
       if(historyDate.length>5) historyDate.pop();
       updateHistory('historyDate', historyDate);
     });
