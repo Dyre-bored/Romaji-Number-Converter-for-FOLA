@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Romaji - Number Converter: FOLALALALA~</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #3b82f6, #ef4444);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      transition: background 0.3s ease;
+    }
+    .dark {
+      background: linear-gradient(135deg, #111827, #1f2937);
+      color: #f9fafb;
+    }
+    .card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    h2 {margin:0 0 12px 0;}
+    textarea, input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-top: 8px;
+    }
+    button {
+      background: linear-gradient(135deg,#2563eb,#9333ea);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.05); }
+    .toggleBtn { margin-left:auto; }
+    .tabs { display:flex; gap:8px; margin-bottom:12px; }
+    .tabBtn { flex:1; padding:10px; border-radius:8px; background:#374151; }
+    .tabBtn.active { background:#1d4ed8; }
+    .tabContent { display:none; }
+    .tabContent.active { display:block; }
+    .row { display:flex; gap:8px; align-items:center; margin-top:12px; }
+    .result { background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-top:12px; }
+    .refBox { display:none; margin-top:12px; padding:10px; background:rgba(0,0,0,0.4); border-radius:8px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="row">
+      <h2>Romaji - Number Converter: FOLALALALA~</h2>
+      <button id="toggleDark" class="toggleBtn">🌙</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tabBtn active" data-tab="numbers">Numbers Converter</button>
+      <button class="tabBtn" data-tab="dates">Date Q&A</button>
+    </div>
+
+    <!-- Numbers Converter Tab -->
+    <div id="numbers" class="tabContent active">
+      <label>Romaji → Number</label>
+      <textarea id="romajiInput" placeholder="e.g. hachijuu kyuuman gosen nihyaku ichi"></textarea>
+      <div class="row">
+        <button id="convertRomaji">Convert</button>
+        <button id="clearRomaji" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">Clear</button>
+      </div>
+      <div class="result" id="romajiToNum">Number will appear here.</div>
+
+      <label style="margin-top:12px">Number → Romaji</label>
+      <textarea id="numberInput" placeholder="e.g. 895201"></textarea>
+      <div class="row">
+        <button id="convertNumber">Convert</button>
+        <button id="clearNumber" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">Clear</button>
+      </div>
+      <div class="result" id="numToRomaji">Romaji will appear here.</div>
+    </div>
+
+    <!-- Date Q&A Tab -->
+    <div id="dates" class="tabContent">
+      <label>Choose Context Date</label>
+      <input type="date" id="contextDate" />
+      <label style="margin-top:12px">Question (romaji)</label>
+      <textarea id="dateQuestion" placeholder="e.g. ashita wa nannichi desu ka"></textarea>
+      <div class="row">
+        <button id="processDateQ">Ask</button>
+        <button id="clearDateQ" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">Clear</button>
+      </div>
+      <div class="result" id="dateAnswer">Answer will appear here.</div>
+      <div class="row" style="margin-top:12px">
+        <button id="toggleRef">📖 Show Reference</button>
+      </div>
+      <div class="refBox" id="refBox">
+        <b>Days of the Week:</b><br>
+        getsuyoubi (Mon), kayoubi (Tue), suiyoubi (Wed), mokuyoubi (Thu), kinyoubi (Fri), doyoubi (Sat), nichiyoubi (Sun)<br><br>
+        <b>Days of the Month (irregular):</b><br>
+        1: tsuitachi, 2: futsuka, 3: mikka, 4: yokka, 5: itsuka, 6: muika, 7: nanoka, 8: youka, 9: kokonoka, 10: tooka, 14: juuyokka, 20: hatsuka, 24: nijuuyokka
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tabBtn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tabContent').forEach(c=>c.classList.remove('active'));
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Dark mode toggle
+    document.getElementById('toggleDark').addEventListener('click',()=>{
+      document.body.classList.toggle('dark');
+    });
+
+    // Toggle Reference
+    document.getElementById('toggleRef').addEventListener('click',()=>{
+      const box=document.getElementById('refBox');
+      box.style.display=box.style.display==='block'?'none':'block';
+    });
+
+    // Day/Month helpers
+    const dayNames=['nichiyoubi','getsuyoubi','kayoubi','suiyoubi','mokuyoubi','kinyoubi','doyoubi'];
+    const monthDays={1:'tsuitachi',2:'futsuka',3:'mikka',4:'yokka',5:'itsuka',6:'muika',7:'nanoka',8:'youka',9:'kokonoka',10:'tooka',14:'juuyokka',20:'hatsuka',24:'nijuuyokka'};
+    function getDayName(date){return dayNames[date.getDay()]}
+    function getDayOfMonth(date){let d=date.getDate();return monthDays[d]||(`${numberToRomaji(d)} nichi`)}
+
+    // Romaji to Number (supports up to 999999)
+    function romajiToNumber(str){
+      const map={zero:0,rei:0,ichi:1,ni:2,san:3,yon:4,shi:4,go:5,roku:6,nana:7,shichi:7,hachi:8,kyuu:9,ku:9,juu:10,hyaku:100,sen:1000,man:10000};
+      let parts=str.trim().split(/\s+/);
+      let total=0,num=0;
+      parts.forEach(p=>{
+        if(map[p]>=10){
+          if(num===0) num=1;
+          num*=map[p];
+          if(map[p]>=10000){total+=num;num=0;}
+        }else if(map[p]!==undefined){num+=map[p];}
+      });
+      total+=num;return total;
+    }
+
+    // Number to Romaji (supports up to 999999)
+    function numberToRomaji(num){
+      if(num===0)return 'zero';
+      const units=['','ichi','ni','san','yon','go','roku','nana','hachi','kyuu'];
+      const tens=['','juu','ni juu','san juu','yon juu','go juu','roku juu','nana juu','hachi juu','kyuu juu'];
+      const hundreds=['','hyaku','ni hyaku','sanbyaku','yon hyaku','go hyaku','roppyaku','nana hyaku','happyaku','kyuu hyaku'];
+      const thousands=['','sen','ni sen','san zen','yon sen','go sen','roku sen','nana sen','hassen','kyuu sen'];
+      const man='man';
+      let res='';
+      if(num>=10000){
+        let manPart=Math.floor(num/10000);
+        res+=numberToRomaji(manPart)+' '+man;
+        num%=10000;
+        if(num>0) res+=' ';
+      }
+      if(num>=1000){
+        let th=Math.floor(num/1000);
+        res+=thousands[th];
+        num%=1000;
+        if(num>0) res+=' ';
+      }
+      if(num>=100){
+        let h=Math.floor(num/100);
+        res+=hundreds[h];
+        num%=100;
+        if(num>0) res+=' ';
+      }
+      if(num>=10){
+        let t=Math.floor(num/10);
+        res+=tens[t];
+        num%=10;
+        if(num>0) res+=' ';
+      }
+      if(num>0){res+=units[num];}
+      return res.trim();
+    }
+
+    // Conversion events
+    document.getElementById('convertRomaji').addEventListener('click',()=>{
+      const input=document.getElementById('romajiInput').value.trim().toLowerCase();
+      document.getElementById('romajiToNum').textContent=input?romajiToNumber(input):'Please enter romaji number.';
+    });
+    document.getElementById('clearRomaji').addEventListener('click',()=>{
+      document.getElementById('romajiInput').value='';
+      document.getElementById('romajiToNum').textContent='Number will appear here.';
+    });
+
+    document.getElementById('convertNumber').addEventListener('click',()=>{
+      const input=parseInt(document.getElementById('numberInput').value.trim());
+      document.getElementById('numToRomaji').textContent=!isNaN(input)?numberToRomaji(input):'Please enter a valid number.';
+    });
+    document.getElementById('clearNumber').addEventListener('click',()=>{
+      document.getElementById('numberInput').value='';
+      document.getElementById('numToRomaji').textContent='Romaji will appear here.';
+    });
+
+    // Date Q&A logic
+    document.getElementById('processDateQ').addEventListener('click',()=>{
+      const q=document.getElementById('dateQuestion').value.trim().toLowerCase();
+      const dateVal=document.getElementById('contextDate').value;
+      const ansBox=document.getElementById('dateAnswer');
+      if(!q||!dateVal){ansBox.textContent='Please provide a date and a question.';return;}
+      const baseDate=new Date(dateVal);
+      let targetDate=new Date(baseDate);
+
+      if(q.includes('ashita')) targetDate.setDate(baseDate.getDate()+1);
+      else if(q.includes('asatte')) targetDate.setDate(baseDate.getDate()+2);
+      else if(q.includes('kinou')) targetDate.setDate(baseDate.getDate()-1);
+      else if(q.includes('ototoi')) targetDate.setDate(baseDate.getDate()-2);
+      else if(q.includes('kyou')) targetDate=baseDate;
+
+      const contextString=`(context: ${baseDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})})`;
+
+      if(q.includes('nannichi')){
+        let copula=q.includes('deshita')? 'deshita.' : 'desu.';
+        ansBox.textContent=`${contextString} ${q} = ${getDayOfMonth(targetDate)} ${copula}`;
+      }else if(q.includes('nan youbi')||q.includes('nanyoubi')){
+        let copula=q.includes('deshita')? 'deshita.' : 'desu.';
+        ansBox.textContent=`${contextString} ${q} = ${getDayName(targetDate)} ${copula}`;
+      }else if(q.includes('nichi')){
+        const asked=q.match(/([a-z ]+)nichi/);
+        if(asked){
+          const askedRomaji=asked[1].trim();
+          const askedNum=romajiToNumber(askedRomaji);
+          const actualNum=targetDate.getDate();
+          const actual=getDayOfMonth(targetDate);
+          let copula=q.includes('deshita')? 'deshita.' : 'desu.';
+          ansBox.textContent=`${contextString} ${q} = `+((askedNum===actualNum)? 'Hai, sou desu.' : `Iie, ${actual} ${copula}`);
+        }else{
+          ansBox.textContent='Sumimasen, sono shitsumon wa mada wakarimasen.';
+        }
+      }else if(q.includes('youbi')){
+        const found=dayNames.find(d=>q.includes(d));
+        if(found){
+          const actual=getDayName(targetDate);
+          let copula=q.includes('deshita')? 'deshita.' : 'desu.';
+          ansBox.textContent=`${contextString} ${q} = `+((found===actual)? 'Hai, sou desu.' : `Iie, ${actual} ${copula}`);
+        }else{
+          ansBox.textContent='Sumimasen, sono shitsumon wa mada wakarimasen.';
+        }
+      }else{
+        ansBox.textContent='Sumimasen, sono shitsumon wa mada wakarimasen.';
+      }
+    });
+
+    document.getElementById('clearDateQ').addEventListener('click',()=>{
+      document.getElementById('dateQuestion').value='';
+      document.getElementById('dateAnswer').textContent='Answer will appear here.';
+    });
+  </script>
+</body>
+</html>
